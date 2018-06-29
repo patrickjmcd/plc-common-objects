@@ -1,0 +1,2639 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--Routine for setting PLC time from NTP server-->
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="31.00" TargetName="NTP" TargetType="Routine" TargetSubType="RLL" ContainsContext="true" Owner="Patrick McDonagh" ExportDate="Fri Jun 29 10:52:54 2018" ExportOptions="References NoRawData L5KData DecoratedData Context Dependencies ForceProtectedEncoding AllProjDocTrans">
+<Controller Use="Context" Name="Transfer_Station_Lite">
+<DataTypes Use="Context">
+<DataType Name="DateTime" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Year" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Month" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Day" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Hours" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Minutes" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="MicroSeconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+</DataType>
+<DataType Name="T_Sync_CreateSrc" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Type" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[1 - TCP 2- UPD]]>
+</Description>
+</Member>
+<Member Name="Addr" DataType="T_Sync_SockAddr" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+<Dependencies>
+<Dependency Type="DataType" Name="T_Sync_SockAddr"/>
+</Dependencies>
+</DataType>
+<DataType Name="T_Sync_Data" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Create_Source" DataType="T_Sync_CreateSrc" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Instance" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Open_Source" DataType="T_Sync_OpenSrc" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Read_Source" DataType="T_Sync_ReadSrc" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Read_Response" DataType="T_Sync_ReadDest" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Write_Source" DataType="T_Sync_WriteSrc" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Write_SizeSent" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+<Dependencies>
+<Dependency Type="DataType" Name="T_Sync_CreateSrc"/>
+<Dependency Type="DataType" Name="T_Sync_OpenSrc"/>
+<Dependency Type="DataType" Name="T_Sync_ReadSrc"/>
+<Dependency Type="DataType" Name="T_Sync_ReadDest"/>
+<Dependency Type="DataType" Name="T_Sync_WriteSrc"/>
+</Dependencies>
+</DataType>
+<DataType Name="T_Sync_OpenSrc" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Dest_Addr" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+</DataType>
+<DataType Name="T_Sync_ReadData" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Flags" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Delay" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Dispersion" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="ID" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Reference_SecTime_Whole_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Reference_Time_Fractional_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Originator_SecTime_Whole_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Originator_Time_Fractional_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Recieved_Time_Whole_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Recieved_Time_Fractional_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Transmitted_Time_Whole_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Transmitted_Time_Fractional_Seconds" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="pad" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[This allows detection of more then 48 bytes returned.]]>
+</Description>
+</Member>
+</Members>
+</DataType>
+<DataType Name="T_Sync_ReadDest" Family="NoFamily" Class="User">
+<Members>
+<Member Name="From_Address" DataType="T_Sync_SockAddr" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Data_Length" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="NTP_Data" DataType="T_Sync_ReadData" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+<Dependencies>
+<Dependency Type="DataType" Name="T_Sync_SockAddr"/>
+<Dependency Type="DataType" Name="T_Sync_ReadData"/>
+</Dependencies>
+</DataType>
+<DataType Name="T_Sync_ReadSrc" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="BufLen" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+</DataType>
+<DataType Name="T_Sync_SockAddr" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Family" DataType="INT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Address Family Must be 2]]>
+</Description>
+</Member>
+<Member Name="Port" DataType="INT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Port Number]]>
+</Description>
+</Member>
+<Member Name="IP_4th_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="IP_3rd_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="IP_2nd_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="IP_1st_Octect" DataType="SINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+</DataType>
+<DataType Name="T_Sync_WriteSrc" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Timeout" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="ToAddr" DataType="T_Sync_SockAddr" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Buffer" DataType="STRING" Dimension="0" Radix="NullType" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+<Dependencies>
+<Dependency Type="DataType" Name="T_Sync_SockAddr"/>
+</Dependencies>
+</DataType>
+<DataType Name="Time" Family="NoFamily" Class="User">
+<Members>
+<Member Name="Year" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Month" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Day" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Hour" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Minute" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Second" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+<Member Name="Microsecond" DataType="DINT" Dimension="0" Radix="Decimal" Hidden="false" ExternalAccess="Read/Write"/>
+</Members>
+</DataType>
+</DataTypes>
+<AddOnInstructionDefinitions Use="Context">
+<AddOnInstructionDefinition Name="T_ADD" Revision="1.0" RevisionExtension="01 Release" Vendor="Rockwell Automation" ExecutePrescan="false" ExecutePostscan="false" ExecuteEnableInFalse="false" CreatedDate="2008-04-08T21:16:05.802Z" CreatedBy="Not Available" EditedDate="2018-05-30T20:54:20.572Z" EditedBy="PATRICKMCDO8E0A\patrickjmcd"
+ SoftwareRevision="v30.00">
+<Description>
+<![CDATA[DateTime := DateTime + Time]]>
+</Description>
+<RevisionNote>
+<![CDATA[Add buffering of input Ref_DT so same tag can be used as Ref_DT and Ref_Out (to "bump" a DateTime)]]>
+</RevisionNote>
+<AdditionalHelpText>
+<![CDATA[T_Add : Add Date/Time plus Time to get new Date/Time
+
+This instruction adds a given amount of Time to a Date/Time to arrive at a new Date/Time.
+The new Date/Time is "normalized", that is, given as a valid (if possible) Gregorian Date and Time:
+
+*  0 <= Microseconds < 1,000,000
+*  0 <= Seconds < 60    (NOTE: this instruction cannot add leap seconds;  sorry!)
+*  0 <= Minutes < 60
+*  0 <= Hours < 24
+*  1 <= Day <= 31 AND Date is a Valid Gregorian Date (see below)
+*  1 <= Month <= 12
+
+NOTE:  The Ref_DT parameter must be a valid Date and Time, NOT an AMOUNT of time!
+   The Ref_Time parameter is the AMOUNT of  time!  If you swap these, you'll get an invalid
+    result, at least if Ref_DT.Yr, Ref_DT.Mo or Ref_DT.Da is zero!
+
+NOTE:  This instruction does NOT switch to Julian dates for dates before 1582 (or 1753 or
+    whenever your place of interest switched to the Gregorian Calendar -- see Wikipedia on
+    "Gregorian Calendar" for details)!  This instruction assumes the Gregorian Calendar extends
+    "indefinitely" (about 5.8 million years) either side of "zero" CE!  It DOES handle the Gregorian
+    4 / 100 / 400 year rules, so Feb. 29, 2000 is a valid date, but Feb. 29, 2100 is not.  It DOES
+    NOT handle Daylight Savings Time hour offsets when the amount of Time added carries the
+    Date/Time across summer/winter time boundaries.
+]]>
+</AdditionalHelpText>
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Input - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Output - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_DT" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[DT (Date/Time) to which to add Time]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_Time" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[Time to be added to DT (Date/Time)]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_Out" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[Date/Time = DT+Time]]>
+</Description>
+</Parameter>
+</Parameters>
+<LocalTags>
+<LocalTag Name="Wrk_YrFromMo" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Years to add from Months]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_DaFromHr" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Days to add from Hours]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_HrFromMin" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Hours to add from Minutes]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_MinFromSec" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Minutes to add from Seconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_SecFrom_uSec" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Seconds to add from Microseconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_yyy" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Intermediate for year calculation]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_y" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Calculated YEAR from Gregorian Day Number]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_mmm" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Intermediate for month calculation]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_m" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Calculated MONTH from Gregorian Day Number]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_GD" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Gregorian Day Number (calculated for given Y/M/D)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_G" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of Year and F)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_F" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of month)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_ddd" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Intermediate for day calculation]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_DT" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[Buffered copy of Ref_DT]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="ST">
+<Description>
+<![CDATA[Add Date/Time plus Time to give new Date/Time]]>
+</Description>
+<STContent>
+<Line Number="0">
+<![CDATA[// T_ADD : TIME -- ADD DATE/TIME PLUS TIME -> DATE/TIME]]>
+</Line>
+<Line Number="1">
+<![CDATA[//]]>
+</Line>
+<Line Number="2">
+<![CDATA[// This instruction adds a given amount of Time to a Date/Time to arrive at a new Date/Time]]>
+</Line>
+<Line Number="3">
+<![CDATA[// The new Date/Time is "normalized", that is, given as a valid (if possible) Gregorian Date and Time:]]>
+</Line>
+<Line Number="4">
+<![CDATA[//]]>
+</Line>
+<Line Number="5">
+<![CDATA[//   *  0 <= Microseconds < 1,000,000]]>
+</Line>
+<Line Number="6">
+<![CDATA[//   *  0 <= Seconds < 60    (NOTE: this instruction cannot add leap seconds;  sorry!]]>
+</Line>
+<Line Number="7">
+<![CDATA[//   *  0 <= Minutes < 60]]>
+</Line>
+<Line Number="8">
+<![CDATA[//   *  0 <= Hours < 24]]>
+</Line>
+<Line Number="9">
+<![CDATA[//   *  1 <= Day <= 31 AND Date is a Valid Gregorian Date (see below)]]>
+</Line>
+<Line Number="10">
+<![CDATA[//   *  1 <= Month <= 12]]>
+</Line>
+<Line Number="11">
+<![CDATA[//]]>
+</Line>
+<Line Number="12">
+<![CDATA[//  NOTE:  The Ref_DT parameter must be a valid Date and Time, NOT an AMOUNT of time!  The Ref_Time parameter is the AMOUNT of]]>
+</Line>
+<Line Number="13">
+<![CDATA[//    time!  If you swap these, you'll get an invalid result, at least if Ref_DT.Year, Ref_DT.Month or Ref_DT.Day is zero!]]>
+</Line>
+<Line Number="14">
+<![CDATA[//]]>
+</Line>
+<Line Number="15">
+<![CDATA[//  NOTE:  This instruction does NOT switch to Julian dates for dates before 1582 (or 1753 or whenever your place of interest]]>
+</Line>
+<Line Number="16">
+<![CDATA[//    switched to the Gregorian Calendar -- see Wikipedia on "Gregorian Calendar" for details)!  This instruction assumes the ]]>
+</Line>
+<Line Number="17">
+<![CDATA[//    Gregorian Calendar extends "indefinitely" (about 5.8 million years) either side of "zero" CE!  It DOES handle the]]>
+</Line>
+<Line Number="18">
+<![CDATA[//    Gregorian 4 / 100 / 400 year rules, so Feb. 29, 2000 is a valid date, but Feb. 29, 2100 is not.  It DOES NOT handle]]>
+</Line>
+<Line Number="19">
+<![CDATA[//    Daylight Savings Time hour offsets when the amount of Time added carries the Date/Time across summer/winter time boundaries.]]>
+</Line>
+<Line Number="20">
+<![CDATA[//]]>
+</Line>
+<Line Number="21">
+<![CDATA[//  NOTE:  For algorithms used for Gregorian Date and Days Between Dates, see http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html]]>
+</Line>
+<Line Number="22">
+<![CDATA[//]]>
+</Line>
+<Line Number="23">
+<![CDATA[//  V1.0-00 2009-04-23: Initial formal release]]>
+</Line>
+<Line Number="24">
+<![CDATA[//	V1.0-01 2014-02-28: Add buffering of input Ref_DT so same tag can be used as Ref_DT and Ref_Out (to "bump" a DateTime)]]>
+</Line>
+<Line Number="25">
+<![CDATA[//]]>
+</Line>
+<Line Number="26">
+<![CDATA[]]>
+</Line>
+<Line Number="27">
+<![CDATA[// Buffer input DateTime]]>
+</Line>
+<Line Number="28">
+<![CDATA[Wrk_DT.Year   := Ref_DT.Year;]]>
+</Line>
+<Line Number="29">
+<![CDATA[Wrk_DT.Month   := Ref_DT.Month;]]>
+</Line>
+<Line Number="30">
+<![CDATA[Wrk_DT.Day   := Ref_DT.Day;]]>
+</Line>
+<Line Number="31">
+<![CDATA[Wrk_DT.Hours   := Ref_DT.Hours;]]>
+</Line>
+<Line Number="32">
+<![CDATA[Wrk_DT.Minutes  := Ref_DT.Minutes;]]>
+</Line>
+<Line Number="33">
+<![CDATA[Wrk_DT.Seconds  := Ref_DT.Seconds;]]>
+</Line>
+<Line Number="34">
+<![CDATA[Wrk_DT.MicroSeconds := Ref_DT.MicroSeconds;]]>
+</Line>
+<Line Number="35">
+<![CDATA[]]>
+</Line>
+<Line Number="36">
+<![CDATA[// Add Microseconds (accounting for adding a negative number of Microseconds!)]]>
+</Line>
+<Line Number="37">
+<![CDATA[Ref_Out.MicroSeconds := (Wrk_DT.MicroSeconds+Ref_Time.MicroSeconds) MOD 1000000;]]>
+</Line>
+<Line Number="38">
+<![CDATA[// Carry excess Seconds]]>
+</Line>
+<Line Number="39">
+<![CDATA[Wrk_SecFrom_uSec := (Wrk_DT.MicroSeconds+Ref_Time.MicroSeconds) / 1000000;]]>
+</Line>
+<Line Number="40">
+<![CDATA[IF (Ref_Out.MicroSeconds < 0) THEN]]>
+</Line>
+<Line Number="41">
+<![CDATA[  Ref_Out.MicroSeconds := Ref_Out.MicroSeconds + 1000000;]]>
+</Line>
+<Line Number="42">
+<![CDATA[  Wrk_SecFrom_uSec := Wrk_SecFrom_uSec - 1;]]>
+</Line>
+<Line Number="43">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="44">
+<![CDATA[]]>
+</Line>
+<Line Number="45">
+<![CDATA[// Add Seconds]]>
+</Line>
+<Line Number="46">
+<![CDATA[Ref_Out.Seconds := (Wrk_DT.Seconds+Ref_Time.Seconds+Wrk_SecFrom_uSec) MOD 60;]]>
+</Line>
+<Line Number="47">
+<![CDATA[// Carry excess Minutes]]>
+</Line>
+<Line Number="48">
+<![CDATA[Wrk_MinFromSec := (Wrk_DT.Seconds+Ref_Time.Seconds+Wrk_SecFrom_uSec) / 60;]]>
+</Line>
+<Line Number="49">
+<![CDATA[// Handle negative sum]]>
+</Line>
+<Line Number="50">
+<![CDATA[IF (Ref_Out.Seconds < 0) THEN]]>
+</Line>
+<Line Number="51">
+<![CDATA[  Ref_Out.Seconds := Ref_Out.Seconds + 60;]]>
+</Line>
+<Line Number="52">
+<![CDATA[  Wrk_MinFromSec := Wrk_MinFromSec - 1;]]>
+</Line>
+<Line Number="53">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="54">
+<![CDATA[]]>
+</Line>
+<Line Number="55">
+<![CDATA[// Add Minutes]]>
+</Line>
+<Line Number="56">
+<![CDATA[Ref_Out.Minutes := (Wrk_DT.Minutes+Ref_Time.Minutes+Wrk_MinFromSec) MOD 60;]]>
+</Line>
+<Line Number="57">
+<![CDATA[// Carry excess Hours]]>
+</Line>
+<Line Number="58">
+<![CDATA[Wrk_HrFromMin := (Wrk_DT.Minutes+Ref_Time.Minutes+Wrk_MinFromSec) / 60;]]>
+</Line>
+<Line Number="59">
+<![CDATA[// Handle negative sum]]>
+</Line>
+<Line Number="60">
+<![CDATA[IF (Ref_Out.Minutes < 0) THEN]]>
+</Line>
+<Line Number="61">
+<![CDATA[  Ref_Out.Minutes := Ref_Out.Minutes + 60;]]>
+</Line>
+<Line Number="62">
+<![CDATA[  Wrk_HrFromMin := Wrk_HrFromMin - 1;]]>
+</Line>
+<Line Number="63">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="64">
+<![CDATA[]]>
+</Line>
+<Line Number="65">
+<![CDATA[// Add Hours]]>
+</Line>
+<Line Number="66">
+<![CDATA[Ref_Out.Hours := (Wrk_DT.Hours+Ref_Time.Hours+Wrk_HrFromMin) MOD 24;]]>
+</Line>
+<Line Number="67">
+<![CDATA[// Carry excess Days]]>
+</Line>
+<Line Number="68">
+<![CDATA[Wrk_DaFromHr := (Wrk_DT.Hours+Ref_Time.Hours+Wrk_HrFromMin) / 24;]]>
+</Line>
+<Line Number="69">
+<![CDATA[// Handle negative sum]]>
+</Line>
+<Line Number="70">
+<![CDATA[IF (Ref_Out.Hours < 0) THEN]]>
+</Line>
+<Line Number="71">
+<![CDATA[  Ref_Out.Hours := Ref_Out.Hours + 24;]]>
+</Line>
+<Line Number="72">
+<![CDATA[  Wrk_DaFromHr := Wrk_DaFromHr - 1;]]>
+</Line>
+<Line Number="73">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="74">
+<![CDATA[]]>
+</Line>
+<Line Number="75">
+<![CDATA[// That takes care of the time.  To add the days, we need to compute a Gregorian Day Number from the input Date,]]>
+</Line>
+<Line Number="76">
+<![CDATA[// then add the days and compute a Date from the new total Gregorian Day Number.  This takes care of the days in the months.]]>
+</Line>
+<Line Number="77">
+<![CDATA[// (After thet, we'll add the Months and Years like we did with the time.)]]>
+</Line>
+<Line Number="78">
+<![CDATA[]]>
+</Line>
+<Line Number="79">
+<![CDATA[// Compute the Gregorian Day Number for the input Date]]>
+</Line>
+<Line Number="80">
+<![CDATA[Wrk_F := (Wrk_DT.Month+9) MOD 12;]]>
+</Line>
+<Line Number="81">
+<![CDATA[Wrk_G := Wrk_DT.Year - Wrk_F/10;]]>
+</Line>
+<Line Number="82">
+<![CDATA[Wrk_GD := 365*Wrk_G+Wrk_G/4-Wrk_G/100+Wrk_G/400+(Wrk_F*306+5)/10+Wrk_DT.Day-1;]]>
+</Line>
+<Line Number="83">
+<![CDATA[]]>
+</Line>
+<Line Number="84">
+<![CDATA[// Add the days]]>
+</Line>
+<Line Number="85">
+<![CDATA[Wrk_GD := Wrk_GD+Ref_Time.Day+Wrk_DaFromHr;]]>
+</Line>
+<Line Number="86">
+<![CDATA[]]>
+</Line>
+<Line Number="87">
+<![CDATA[// And back out from this Gregorian Day Number to a date]]>
+</Line>
+<Line Number="88">
+<![CDATA[Wrk_yyy := TRUNC (Wrk_GD +1.5)/365.2425;]]>
+</Line>
+<Line Number="89">
+<![CDATA[Wrk_ddd := Wrk_GD - (365*Wrk_yyy+Wrk_yyy/4-Wrk_yyy/100+Wrk_yyy/400);]]>
+</Line>
+<Line Number="90">
+<![CDATA[IF (Wrk_ddd < 0) THEN]]>
+</Line>
+<Line Number="91">
+<![CDATA[	Wrk_yyy := Wrk_yyy - 1;]]>
+</Line>
+<Line Number="92">
+<![CDATA[	Wrk_ddd := Wrk_GD - (365*Wrk_yyy+Wrk_yyy/4-Wrk_yyy/100+Wrk_yyy/400);]]>
+</Line>
+<Line Number="93">
+<![CDATA[	IF (Wrk_ddd < 0) THEN]]>
+</Line>
+<Line Number="94">
+<![CDATA[		Wrk_yyy := Wrk_yyy - 1;]]>
+</Line>
+<Line Number="95">
+<![CDATA[		Wrk_ddd := Wrk_GD - (365*Wrk_yyy+Wrk_yyy/4-Wrk_yyy/100+Wrk_yyy/400);]]>
+</Line>
+<Line Number="96">
+<![CDATA[	END_IF;]]>
+</Line>
+<Line Number="97">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="98">
+<![CDATA[Wrk_mmm := (100*Wrk_ddd + 52)/3060;]]>
+</Line>
+<Line Number="99">
+<![CDATA[Wrk_y := Wrk_yyy + (Wrk_mmm + 2)/12;]]>
+</Line>
+<Line Number="100">
+<![CDATA[Wrk_m := ((Wrk_mmm + 2) MOD 12) + 1; ]]>
+</Line>
+<Line Number="101">
+<![CDATA[Ref_Out.Day := Wrk_ddd - ((Wrk_mmm * 306) + 5)/10 + 1;]]>
+</Line>
+<Line Number="102">
+<![CDATA[]]>
+</Line>
+<Line Number="103">
+<![CDATA[// Add Months]]>
+</Line>
+<Line Number="104">
+<![CDATA[Ref_Out.Month := ((Wrk_m+Ref_Time.Month-1) MOD 12)+1;]]>
+</Line>
+<Line Number="105">
+<![CDATA[// Carry excess Years]]>
+</Line>
+<Line Number="106">
+<![CDATA[Wrk_YrFromMo := (Wrk_m+Ref_Time.Month-1) / 12;]]>
+</Line>
+<Line Number="107">
+<![CDATA[// Handle negative sum]]>
+</Line>
+<Line Number="108">
+<![CDATA[IF (Ref_Out.Month < 1) THEN]]>
+</Line>
+<Line Number="109">
+<![CDATA[  Ref_Out.Month := Ref_Out.Month + 12;]]>
+</Line>
+<Line Number="110">
+<![CDATA[  Wrk_YrFromMo := Wrk_YrFromMo - 1;]]>
+</Line>
+<Line Number="111">
+<![CDATA[END_IF;]]>
+</Line>
+<Line Number="112">
+<![CDATA[]]>
+</Line>
+<Line Number="113">
+<![CDATA[// Add Years]]>
+</Line>
+<Line Number="114">
+<![CDATA[Ref_Out.Year := Wrk_y+Ref_Time.Year+Wrk_YrFromMo;]]>
+</Line>
+<Line Number="115">
+<![CDATA[]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+<Dependencies>
+<Dependency Type="DataType" Name="DateTime"/>
+</Dependencies>
+</AddOnInstructionDefinition>
+<AddOnInstructionDefinition Name="T_DIFF" Revision="1.0" RevisionExtension="00 Release" Vendor="Rockwell Automation" ExecutePrescan="false" ExecutePostscan="false" ExecuteEnableInFalse="false" CreatedDate="2008-04-08T21:16:05.802Z" CreatedBy="Not Available" EditedDate="2018-05-30T21:00:08.126Z" EditedBy="PATRICKMCDO8E0A\patrickjmcd"
+ SoftwareRevision="v30.00">
+<Description>
+<![CDATA[Time := DateTime - DateTime]]>
+</Description>
+<RevisionNote>
+<![CDATA[Initial formal release]]>
+</RevisionNote>
+<AdditionalHelpText>
+<![CDATA[T_DIFF : Date/Time minus Date/Time gives Time Difference
+
+This instruction is given two Date/Time points and determines the amount of time between them.  The result is given in Days, Hours, Minutes, Seconds and Microseconds.  (Years and Months are returned as zero, as the number of months is generally not used.)  The Date/Time parameters must be valid Gregorian Dates and valid clock Times:
+
+*  0 <= Microseconds < 1,000,000
+*  0 <= Seconds < 60    (NOTE: this instruction cannot add leap seconds;  sorry!)
+*  0 <= Minutes < 60
+*  0 <= Hours < 24
+*  1 <= Day <= 31 AND Date is a Valid Gregorian Date (see below)
+*  1 <= Month <= 12
+
+... for results to be meaningful.
+
+NOTE:  This instruction does NOT switch to Julian dates for dates before 1582 (or 1753 or whenever your place of interest switched to the Gregorian Calendar -- see Wikipedia on "Gregorian Calendar" for details)!  This instruction assumes the Gregorian Calendar extends "indefinitely" (about 5.8 million years) either side of "zero" CE!  It DOES handle the Gregorian 4 / 100 / 400 year rules, so Feb. 29, 2000 is a valid date, but Feb. 29, 2100 is not.  It DOES NOT handle Daylight Savings Time hour offsets when the Dates cross summer/winter time boundaries.
+]]>
+</AdditionalHelpText>
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Input - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Output - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_DT1" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[DT (Date/Time) to subtract from]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_DT2" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[DT (Date/Time) to subtract]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_Out" TagType="Base" DataType="DateTime" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[Result: Amount of Time between Ref_DT1 and Ref_DT2]]>
+</Description>
+</Parameter>
+</Parameters>
+<LocalTags>
+<LocalTag Name="Wrk_DaFromHr" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Days to add from Hours]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_HrFromMin" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Hours to add from Minutes]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_MinFromSec" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Minutes to add from Seconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_SecFrom_uSec" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Number of Seconds to add from Microseconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_GD1" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Gregorian Day Number (calculated for given Y/M/D)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_G1" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of Year and F)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_F1" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of month)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_F2" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of month)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_G2" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Used in calculating Gregorian Day Number (function of Year and F)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_GD2" DataType="DINT" Radix="Decimal" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Gregorian Day Number (calculated for given Y/M/D)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_Out" DataType="DateTime" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Working accumulator for Output (Out)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="ST">
+<Description>
+<![CDATA[Calculate Days between Dates and Time Difference]]>
+</Description>
+<STContent>
+<Line Number="0">
+<![CDATA[// T_DIFF : TIME -- DATE/TIME MINUS DATE/TIME -> AMOUNT OF TIME]]>
+</Line>
+<Line Number="1">
+<![CDATA[// ]]>
+</Line>
+<Line Number="2">
+<![CDATA[// This instruction finds the difference between one Date/Time and another (both assumed valid) and reports it as]]>
+</Line>
+<Line Number="3">
+<![CDATA[// an Amount of Time.  The amount of time is given as a number of Days, Hours, Minutes, Seconds and Microseconds:]]>
+</Line>
+<Line Number="4">
+<![CDATA[//]]>
+</Line>
+<Line Number="5">
+<![CDATA[//  NOTE:  This instruction does NOT switch to Julian dates for dates before 1582 (or 1753 or whenever your place of interest]]>
+</Line>
+<Line Number="6">
+<![CDATA[//    switched to the Gregorian Calendar -- see Wikipedia on "Gregorian Calendar" for details)!  This instruction assumes the ]]>
+</Line>
+<Line Number="7">
+<![CDATA[//    Gregorian Calendar extends "indefinitely" (about 5.8 million years) either side of "zero" CE!  It DOES handle the]]>
+</Line>
+<Line Number="8">
+<![CDATA[//    Gregorian 4 / 100 / 400 year rules, so Feb. 29, 2000 is a valid date, but Feb. 29, 2100 is not.  It DOES NOT handle]]>
+</Line>
+<Line Number="9">
+<![CDATA[//    Daylight Savings Time hour offsets when one Date/Time is winter time and the other  is summer time boundaries.  This]]>
+</Line>
+<Line Number="10">
+<![CDATA[//    instruction does not deal with Leap Seconds, and Date/Time parameters MUST be valid Gregorian, normalized Date/Time values:]]>
+</Line>
+<Line Number="11">
+<![CDATA[//]]>
+</Line>
+<Line Number="12">
+<![CDATA[//   *  0 <= Microseconds < 1,000,000]]>
+</Line>
+<Line Number="13">
+<![CDATA[//   *  0 <= Seconds < 60]]>
+</Line>
+<Line Number="14">
+<![CDATA[//   *  0 <= Minutes < 60]]>
+</Line>
+<Line Number="15">
+<![CDATA[//   *  0 <= Hours < 24]]>
+</Line>
+<Line Number="16">
+<![CDATA[//   *  0 <= Days <= 31 and a valid Gregorian Date (Feb = 28 or 29 days, etc.)]]>
+</Line>
+<Line Number="17">
+<![CDATA[//   *  1 <= Month <= 12]]>
+</Line>
+<Line Number="18">
+<![CDATA[//   *  year in the range (about) +/- 5.8 million]]>
+</Line>
+<Line Number="19">
+<![CDATA[//]]>
+</Line>
+<Line Number="20">
+<![CDATA[//  NOTE:  For algorithms used for Gregorian Date and Days Between Dates, see http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html]]>
+</Line>
+<Line Number="21">
+<![CDATA[//]]>
+</Line>
+<Line Number="22">
+<![CDATA[//  Version 1.0-00 Release]]>
+</Line>
+<Line Number="23">
+<![CDATA[//	Initial Formal Release]]>
+</Line>
+<Line Number="24">
+<![CDATA[//]]>
+</Line>
+<Line Number="25">
+<![CDATA[]]>
+</Line>
+<Line Number="26">
+<![CDATA[// Add Microseconds]]>
+</Line>
+<Line Number="27">
+<![CDATA[Wrk_Out.MicroSeconds := (Ref_DT1.MicroSeconds-Ref_DT2.MicroSeconds+1000000) MOD 1000000;]]>
+</Line>
+<Line Number="28">
+<![CDATA[// Carry excess Seconds]]>
+</Line>
+<Line Number="29">
+<![CDATA[Wrk_SecFrom_uSec := (Ref_DT1.MicroSeconds-Ref_DT2.MicroSeconds+1000000) / 1000000 - 1;]]>
+</Line>
+<Line Number="30">
+<![CDATA[]]>
+</Line>
+<Line Number="31">
+<![CDATA[// Add Seconds]]>
+</Line>
+<Line Number="32">
+<![CDATA[Wrk_Out.Seconds := (Ref_DT1.Seconds-Ref_DT2.Seconds+Wrk_SecFrom_uSec+60) MOD 60;]]>
+</Line>
+<Line Number="33">
+<![CDATA[// Carry excess Minutes]]>
+</Line>
+<Line Number="34">
+<![CDATA[Wrk_MinFromSec := (Ref_DT1.Seconds-Ref_DT2.Seconds+Wrk_SecFrom_uSec+60) / 60 - 1;]]>
+</Line>
+<Line Number="35">
+<![CDATA[]]>
+</Line>
+<Line Number="36">
+<![CDATA[// Add Minutes]]>
+</Line>
+<Line Number="37">
+<![CDATA[Wrk_Out.Minutes := (Ref_DT1.Minutes-Ref_DT2.Minutes+Wrk_MinFromSec+60) MOD 60;]]>
+</Line>
+<Line Number="38">
+<![CDATA[// Carry excess Hours]]>
+</Line>
+<Line Number="39">
+<![CDATA[Wrk_HrFromMin := (Ref_DT1.Minutes-Ref_DT2.Minutes+Wrk_MinFromSec+60) / 60 - 1;]]>
+</Line>
+<Line Number="40">
+<![CDATA[]]>
+</Line>
+<Line Number="41">
+<![CDATA[// Add Hours]]>
+</Line>
+<Line Number="42">
+<![CDATA[Wrk_Out.Hours := (Ref_DT1.Hours-Ref_DT2.Hours+Wrk_HrFromMin+24) MOD 24;]]>
+</Line>
+<Line Number="43">
+<![CDATA[// Carry excess Days]]>
+</Line>
+<Line Number="44">
+<![CDATA[Wrk_DaFromHr := (Ref_DT1.Hours-Ref_DT2.Hours+Wrk_HrFromMin+24) / 24 - 1;]]>
+</Line>
+<Line Number="45">
+<![CDATA[]]>
+</Line>
+<Line Number="46">
+<![CDATA[// That takes care of the time.  To add the days, we need to compute a Gregorian Day Number from the input Date,]]>
+</Line>
+<Line Number="47">
+<![CDATA[// then add the days and compute a Date from the new total Gregorian Day Number.  This takes care of the days in the months.]]>
+</Line>
+<Line Number="48">
+<![CDATA[// (After thet, we'll add the Months and Years like we did with the time.)]]>
+</Line>
+<Line Number="49">
+<![CDATA[]]>
+</Line>
+<Line Number="50">
+<![CDATA[// Compute the Gregorian Day Number for the input Date]]>
+</Line>
+<Line Number="51">
+<![CDATA[Wrk_F1 := (Ref_DT1.Month+9) MOD 12;]]>
+</Line>
+<Line Number="52">
+<![CDATA[Wrk_G1 := Ref_DT1.Year - Wrk_F1/10;]]>
+</Line>
+<Line Number="53">
+<![CDATA[Wrk_GD1 := 365*Wrk_G1+Wrk_G1/4-Wrk_G1/100+Wrk_G1/400+(Wrk_F1*306+5)/10+Ref_DT1.Day-1;]]>
+</Line>
+<Line Number="54">
+<![CDATA[]]>
+</Line>
+<Line Number="55">
+<![CDATA[Wrk_F2 := (Ref_DT2.Month+9) MOD 12;]]>
+</Line>
+<Line Number="56">
+<![CDATA[Wrk_G2 := Ref_DT2.Year - Wrk_F2/10;]]>
+</Line>
+<Line Number="57">
+<![CDATA[Wrk_GD2 := 365*Wrk_G2+Wrk_G2/4-Wrk_G2/100+Wrk_G2/400+(Wrk_F2*306+5)/10+Ref_DT2.Day-1;]]>
+</Line>
+<Line Number="58">
+<![CDATA[]]>
+</Line>
+<Line Number="59">
+<![CDATA[Wrk_Out.Day := Wrk_GD1 - Wrk_GD2 + Wrk_DaFromHr;]]>
+</Line>
+<Line Number="60">
+<![CDATA[]]>
+</Line>
+<Line Number="61">
+<![CDATA[// If the number of Days is negative, we need to bump it up by one and subtract 23 hours 59 minutes]]>
+</Line>
+<Line Number="62">
+<![CDATA[//  59 seconds 1,000,000 microseconds (same amount of time) to make result look right...]]>
+</Line>
+<Line Number="63">
+<![CDATA[//  Otherwise instead of -1 uSec we get -1 day +23 hours +59 minutes +59 seconds +999,999 microseconds]]>
+</Line>
+<Line Number="64">
+<![CDATA[]]>
+</Line>
+<Line Number="65">
+<![CDATA[If ( Wrk_Out.Day < 0 ) then]]>
+</Line>
+<Line Number="66">
+<![CDATA[	Wrk_Out.Day := Wrk_Out.Day + 1;]]>
+</Line>
+<Line Number="67">
+<![CDATA[	Wrk_Out.Hours := Wrk_Out.Hours - 23;]]>
+</Line>
+<Line Number="68">
+<![CDATA[	Wrk_Out.Minutes := Wrk_Out.Minutes - 59;]]>
+</Line>
+<Line Number="69">
+<![CDATA[	Wrk_Out.Seconds := Wrk_Out.Seconds - 59;]]>
+</Line>
+<Line Number="70">
+<![CDATA[	Wrk_Out.MicroSeconds := Wrk_Out.MicroSeconds - 1000000;]]>
+</Line>
+<Line Number="71">
+<![CDATA[	If ( Wrk_Out.MicroSeconds = -1000000 ) then]]>
+</Line>
+<Line Number="72">
+<![CDATA[		Wrk_Out.MicroSeconds := 0;]]>
+</Line>
+<Line Number="73">
+<![CDATA[		Wrk_Out.Seconds := Wrk_Out.Seconds - 1;]]>
+</Line>
+<Line Number="74">
+<![CDATA[	End_If;]]>
+</Line>
+<Line Number="75">
+<![CDATA[	If ( Wrk_Out.Seconds = -60 ) then]]>
+</Line>
+<Line Number="76">
+<![CDATA[		Wrk_Out.Seconds := 0;]]>
+</Line>
+<Line Number="77">
+<![CDATA[		Wrk_Out.Minutes := Wrk_Out.Minutes - 1;]]>
+</Line>
+<Line Number="78">
+<![CDATA[	End_If;]]>
+</Line>
+<Line Number="79">
+<![CDATA[	If ( Wrk_Out.Minutes = -60 ) then]]>
+</Line>
+<Line Number="80">
+<![CDATA[		Wrk_Out.Minutes := 0;]]>
+</Line>
+<Line Number="81">
+<![CDATA[		Wrk_Out.Hours := Wrk_Out.Hours - 1;]]>
+</Line>
+<Line Number="82">
+<![CDATA[	End_If;]]>
+</Line>
+<Line Number="83">
+<![CDATA[	If ( Wrk_Out.Hours = -24 ) then]]>
+</Line>
+<Line Number="84">
+<![CDATA[		Wrk_Out.Hours := 0;]]>
+</Line>
+<Line Number="85">
+<![CDATA[		Wrk_Out.Day := Wrk_Out.Day - 1;]]>
+</Line>
+<Line Number="86">
+<![CDATA[	End_If;]]>
+</Line>
+<Line Number="87">
+<![CDATA[End_If;]]>
+</Line>
+<Line Number="88">
+<![CDATA[]]>
+</Line>
+<Line Number="89">
+<![CDATA[// Copy the final numbers to the Output tag]]>
+</Line>
+<Line Number="90">
+<![CDATA[]]>
+</Line>
+<Line Number="91">
+<![CDATA[Ref_Out.Day := Wrk_Out.Day;]]>
+</Line>
+<Line Number="92">
+<![CDATA[Ref_Out.Hours := Wrk_Out.Hours;]]>
+</Line>
+<Line Number="93">
+<![CDATA[Ref_Out.Minutes := Wrk_Out.Minutes;]]>
+</Line>
+<Line Number="94">
+<![CDATA[Ref_Out.Seconds := Wrk_Out.Seconds;]]>
+</Line>
+<Line Number="95">
+<![CDATA[Ref_Out.MicroSeconds := Wrk_Out.MicroSeconds;]]>
+</Line>
+<Line Number="96">
+<![CDATA[]]>
+</Line>
+<Line Number="97">
+<![CDATA[// No Months]]>
+</Line>
+<Line Number="98">
+<![CDATA[Ref_Out.Month := 0;]]>
+</Line>
+<Line Number="99">
+<![CDATA[// No Years]]>
+</Line>
+<Line Number="100">
+<![CDATA[Ref_Out.Year := 0;]]>
+</Line>
+<Line Number="101">
+<![CDATA[]]>
+</Line>
+</STContent>
+</Routine>
+</Routines>
+<Dependencies>
+<Dependency Type="DataType" Name="DateTime"/>
+</Dependencies>
+</AddOnInstructionDefinition>
+<AddOnInstructionDefinition Name="T_Sync" Revision="1.0" RevisionExtension="04 Release" Vendor="Rockwell Automation" ExecutePrescan="true" ExecutePostscan="false" ExecuteEnableInFalse="false" CreatedDate="2013-01-04T15:57:55.422Z" CreatedBy="Not Available" EditedDate="2018-05-30T20:58:23.927Z" EditedBy="PATRICKMCDO8E0A\patrickjmcd"
+ SoftwareRevision="v30.00">
+<Description>
+<![CDATA[Clock Sync via NTP]]>
+</Description>
+<RevisionNote>
+<![CDATA[Corrected configured Source Element for Open Socket MSG to point to  T_Sync_NTPData.Open_Source. Added rung (in AOI Logic routine) for Local Strings to aid in setting timeserver hostname and IP port.]]>
+</RevisionNote>
+<AdditionalHelpText>
+<![CDATA[Copyright © Rockwell Automation, Inc.  All Rights Reserved.
+
+This object synchronizes the controller real-time clock with a
+"reliable" NTP Time Server (computer responsible for network
+time, or a standard time server, like time.windows.com, etc.)
+
+*** NOTE: This is NOT a full NTP precision exchange!  It is simply a quick
+"get" of the NTP server time and applying it to the controller clock! ***
+
+It supports the following featues:
+  * Ability to sync controller clock to server on Maintenance command
+  * Ability to sync on a periodic (default = daily) basis
+  * Ability to retry on a periodic (default = hourly) basis on a failure to
+      retrieve date/time from server
+  * Ability to sync on controller powerup or PROG to RUN transition.
+  * Ability via configuration to allow or disallow each of the above methods
+  * Reads time from NTP server and displays time received as Values.
+  * Updates the controller clock to time received (if allowed by config)
+  * Calculates clock drift (difference between previous and new controller
+       time) and displays as Values.
+
+CONFIGURATION:
+
+Cfg_Host is the host name or IP address of the NTP server.  If you have
+    a domain controller, you should use that as your time server. The default
+    value is "time.nist.gov" which is a redirect to a number of NIST time servers
+    around the U.S.  This string may contain a host name (e.g.,
+    'timeserver.domain.com') or an IP address (e.g., '192.168.1.1')
+
+Cfg_Port is a text string giving the IP port to use for the time service. The format
+    is '?port=nnn' and the default is '?port=123' (default for NTP protocol).
+
+Cfg_PollT:  The Poll Time (def = 1440 min = 1 day) is the number of minutes
+    between polls of the NTP server for reliable time after a SUCCESSFUL
+    get of the time.
+
+Cfg_RetryT:  The Retry Time (def = 60 min = 1 hour) is the number of minutes
+    between polls of the NTP server for reliable time after a FAILURE to get
+    the time.
+
+Cfg_ENSlotNumber:  Enter the chassis slot number of the EtherNet/IP
+    module (e.g., 1756-EN2T) that can communicate with the time server.
+    This module must support "socket services". See Rockwell Automation
+    Publication ENET-AT002_-EN-P for details.
+
+Cfg_AllowClockUpdate:
+    1 = Allow AOI to update controller clock,
+    0 = Just get the time (UTC) and display it.
+
+Cfg_AllowMCmdSync:
+    1 = Permit manual sync request via MCmd_Sync,
+    0 = No manual sync request allowed.
+
+Cfg_AllowPeriodicSync:
+    1 = Permit enabling periodic clock sync via MCmd_Enable,
+    0 = Periodic sync is kept disabled.
+
+Cfg_SyncOnPwrup:
+    1 = Request time sync on controller first scan.
+    0 = Do not initiate sync on controller first scan.
+]]>
+</AdditionalHelpText>
+<Parameters>
+<Parameter Name="EnableIn" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Input - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="EnableOut" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Enable Output - System Defined Parameter]]>
+</Description>
+</Parameter>
+<Parameter Name="Cfg_PollT" TagType="Base" DataType="DINT" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Interval at which to sync to NTP server (minutes)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[1440]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="1440"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_RetryT" TagType="Base" DataType="DINT" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Delay between retries if comms error with NTP server (minutes)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[60]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="60"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_ENSlotNumber" TagType="Base" DataType="SINT" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Ethernet module (e.g. 1756-EN2T) location in controller chassis]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="SINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_AllowClockUpdate" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[1=Allow AOI to update controller clock, 0=just get the time and display]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_AllowMCmdSync" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[1=Permit manual sync request via MCmd_Sync 0=no manual sync]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_AllowPeriodicSync" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[1=Permit enabling periodic clock sync, 0=no periodic sync]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Cfg_SyncOnPwrup" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[1=request time sync on controller first scan]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="MCmd_Sync" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Maintenance Coimmand to sync clock to NTP server NOW.]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="MCmd_Enable" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Maintenance Command to enable periodic clock sync]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="MCmd_Disable" TagType="Base" DataType="BOOL" Usage="Input" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Maintenance Command to disable periodic clock sync]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdYr" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Year]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdMo" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Month]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdDa" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Day]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdHr" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Hours]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdMin" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Minutes]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdSec" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Seconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_RcvdUSec" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[UTC Date/Time as received: Microseconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_DriftDa" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Clock drift since last sync: Days]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_DriftHr" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Clock drift since last sync: Hours]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_DriftMin" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Clock drift since last sync: Minutes]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_DriftSec" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Clock drift since last sync: Seconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_DriftUSec" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Clock drift since last sync: Microseconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_NextSyncMin" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Countdown until next periodic sync (minutes in mm:ss)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Val_NextSyncSec" TagType="Base" DataType="DINT" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Countdown until next periodic sync (seconds in mm:ss)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_Enabled" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Maintenance has enabled periodic time sync with NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_Timing" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Waiting Poll Time until next periodic sync]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_Busy" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Getting time sync data from NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_Done" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Received time sync data from NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_MsgErr" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="true" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Error getting time sync data, see other Sts bits for reason]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_NoSock" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Msg Err: No Socket available: check EN slot number, module type and FW]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_HostInv" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Msg Err: Host name or IP invalid, fix Cfg_Host string]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_ReqFail" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Msg Err: Unable to send sync request to NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_NoReply" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Msg Err: No reply from NTP server: check IP, firewall config (port 123)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Sts_BadReply" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[Msg Err: Invalid reply received from NTP server (bad length)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Rdy_Sync" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[1=Ready to receive MCmd_Sync (enable button)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Rdy_Enable" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[1=Ready to receive MCmd_Enable (enable button)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Rdy_Disable" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read Only">
+<Description>
+<![CDATA[1=Ready to receive MCmd_Disable (enable button)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+<Parameter Name="Ref_SockData" TagType="Base" DataType="T_Sync_Data" Usage="InOut" Required="true" Visible="true" Constant="false">
+<Description>
+<![CDATA[UDT for data for NTP server interface]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_SockCreateMSG" TagType="Base" DataType="MESSAGE" Usage="InOut" Required="true" Visible="true">
+<Description>
+<![CDATA[MSG to create UDP socket instance.]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_SockOpenMSG" TagType="Base" DataType="MESSAGE" Usage="InOut" Required="true" Visible="true">
+<Description>
+<![CDATA[MSG to open UDP socket instance (gets IP address given hostname)]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_SockWriteMSG" TagType="Base" DataType="MESSAGE" Usage="InOut" Required="true" Visible="true">
+<Description>
+<![CDATA[MSG to write outgoing UDP socket data.]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_SockReadMSG" TagType="Base" DataType="MESSAGE" Usage="InOut" Required="true" Visible="true">
+<Description>
+<![CDATA[MSG to read incoming UDP socket data.]]>
+</Description>
+</Parameter>
+<Parameter Name="Ref_SockDeleteMSG" TagType="Base" DataType="MESSAGE" Usage="InOut" Required="true" Visible="true">
+<Description>
+<![CDATA[MSG to delete UDP socket instance]]>
+</Description>
+</Parameter>
+<Parameter Name="T_Sync" TagType="Base" DataType="BOOL" Usage="Output" Radix="Decimal" Required="false" Visible="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Unique Parameter Name for auto - discovery]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</Parameter>
+</Parameters>
+<LocalTags>
+<LocalTag Name="Wrk_TDiff" DataType="T_DIFF" ExternalAccess="None">
+<Description>
+<![CDATA[Backing tag for T_DIFF Instruction]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[1,0,0,0,0,0,0,0,0,0,0,[0,0,0,0,0,0,0]]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="T_DIFF">
+<DataValueMember Name="EnableIn" DataType="BOOL" Value="1"/>
+<DataValueMember Name="EnableOut" DataType="BOOL" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_TAdd" DataType="T_ADD" ExternalAccess="None">
+<Description>
+<![CDATA[Backing tag for T_ADD instruction]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[1,0,0,0,0,0,0,0,0,0,0,0,0,0,[0,0,0,0,0,0,0]]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="T_ADD">
+<DataValueMember Name="EnableIn" DataType="BOOL" Value="1"/>
+<DataValueMember Name="EnableOut" DataType="BOOL" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_SyncNow" DataType="BOOL" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Operator requested to sync clock with NTP server now]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_State" DataType="DINT" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Current state of sequence to get NTP server time]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_NTPTime" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[The (UTC) time retrieved from the NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_NTPSec" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[NTP time (UTC) as offset from Rollover date/time]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_NTPRollover" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[Date and Time that NTP time (seconds) rolls over for DINT]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[2036,2,7,6,28,16,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="2036"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="7"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="6"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="28"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="16"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_NTPFracSec" DataType="DINT" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Fractional Seconds from NTP packet (.31 = 0.5, .30 = 0.25, etc.)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_PollT" DataType="TIMER" ExternalAccess="None">
+<Description>
+<![CDATA[Timer for time until next sync with NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,86400000,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="TIMER">
+<DataValueMember Name="PRE" DataType="DINT" Radix="Decimal" Value="86400000"/>
+<DataValueMember Name="ACC" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="EN" DataType="BOOL" Value="0"/>
+<DataValueMember Name="TT" DataType="BOOL" Value="0"/>
+<DataValueMember Name="DN" DataType="BOOL" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_LastSyncFail" DataType="BOOL" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Last attempt to sync with NTP server failed (1) or succeeded (0)]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_Enabled" DataType="BOOL" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Maintenance has enabled periodic sync with NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_CtrlrTime" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[The controller time at last sync with NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_CtrlrClockDrift" DataType="DateTime" ExternalAccess="None">
+<Description>
+<![CDATA[Amount controller clock has drifted since last sync with NTP server]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[0,0,0,0,0,0,0]]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<Structure DataType="DateTime">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Hours" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Minutes" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="MicroSeconds" DataType="DINT" Radix="Decimal" Value="0"/>
+</Structure>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Wrk_TaskPer" DataType="DINT" Radix="Decimal" ExternalAccess="None">
+<Description>
+<![CDATA[Configured Task period in microseconds]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[0]]>
+</DefaultData>
+<DefaultData Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="0"/>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Cfg_Host" DataType="STRING" ExternalAccess="None">
+<Description>
+<![CDATA[Host name (e.g. 'tmserve.domain.com') or IP Address (e.g. '192.168.3.1')]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[13,'time.nist.gov$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00']]]>
+</DefaultData>
+<DefaultData Format="String" Length="13">
+<![CDATA['time.nist.gov']]>
+</DefaultData>
+</LocalTag>
+<LocalTag Name="Cfg_Port" DataType="STRING" ExternalAccess="None">
+<Description>
+<![CDATA[Port number string for Open request]]>
+</Description>
+<DefaultData Format="L5K">
+<![CDATA[[9,'?port=123$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00']]]>
+</DefaultData>
+<DefaultData Format="String" Length="9">
+<![CDATA['?port=123']]>
+</DefaultData>
+</LocalTag>
+</LocalTags>
+<Routines>
+<Routine Name="Logic" Type="RLL">
+<Description>
+<![CDATA[Synchronize controller clock with network time via NTP protocol, on command or periodically]]>
+</Description>
+<RLLContent>
+<Rung Number="0" Type="N">
+<Comment>
+<![CDATA[Copyright © Rockwell Automation, Inc.  All Rights Reserved.
+============================================================
+T_Sync:  TIME -- CONTROLLER CLOCK SYNC
+============================================================
+Version 1.0-04 Release:  2014-06-06
+V1.0-00  2013-03-05:  First release for use with PlantPAx Library 2.0-09.
+V1.0-01  2013-06-30: Changed self-named parameter to Read/Write external
+access (for future PlantPAx Process Library 3.0 ME Faceplate use)
+V1.0-02  2014-02-28:  Modified to use Cfg_Host (local string) for host
+name or IP address, e.g., "timeserver.domain.com".
+Default value is "time.nist.gov", a redirect to a large
+network of shared time servers. Uses updated T_ADD V1.0-01.
+V1.0-03  2014-05-28:  Corrected configured Source Element for Open
+Socket MSG to point to T_Sync_NTPData.Open_Source.
+V1.0-04 2014-06-06: Added rung for Local Strings to aid in setting
+timeserver hostname and IP port.
+============================================================
+This object synchronizes the controller real-time clock with a
+"reliable" NTP Time Server (computer responsible for network
+time, or a standard time server, like time.windows.com, etc.)
+
+*** NOTE: This is NOT a full NTP precision exchange!  It is simply a quick
+"get" of the NTP server time and applying it to the controller clock! ***
+
+It supports the following featues:
+* Ability to sync controller clock to server on operator command
+* Ability to sync on a periodic (default = daily) basis
+* Ability to retry on a periodic (default = hourly) basis
+on a failure to retrieve date/time from server
+* Ability to sync on controller powerup or PROG to RUN transition.
+* Ability via configuration to allow or disallow each of the above methods
+* Reads time from NTP server and displays time received as Values.
+* Updates the controller clock to time received (if allowed by config)
+* Calculates clock drift (difference between previous and new
+controller time) and displays as Values.
+============================================================
+SHOW LOCAL STRINGS
+============================================================
+The STRINGs containing the text associated with each instance of this
+instruction cannot be Input or Output Parameters, because STRINGs are not
+ 'atomic' types. (Inputs and Outputs must be SINT, INT, DINT, REAL, or BOOL.)
+
+In order to make it easier to find and configure these STRINGs, this rung
+was added.  THE JMP (and the LBL on the following rung)
+MUST NOT BE REMOVED!!!
+
+To view the STRINGs, go to the instruction instance (in LD or FBD), RIGHT-click
+to bring up the context menu and select "Open Instruction Logic".
+This rung will appear with the STRING values for the selected instance.
+You may double-click the STRING values here to modify them as well.]]>
+</Comment>
+<Text>
+<![CDATA[JMP(SkipText)LOWER(Cfg_Host,Cfg_Port);]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Comment>
+<![CDATA[============================================================
+HANDLE CONFIGURATION
+============================================================
+These rungs handle configuration data for this instruction
+
+Cfg_PollT:  The Poll Time (def = 1440 min = 1 day) is the number of
+minutes between polls of the NTP server for
+reliable time after a SUCCESSFUL get of the time.
+
+If the entered time results in a negative timer preset (which would
+fault the controller), set the poll time to its default.]]>
+</Comment>
+<Text>
+<![CDATA[LBL(SkipText)XIO(Wrk_LastSyncFail)MUL(Cfg_PollT,60000,Wrk_PollT.PRE)XIC(Wrk_PollT.PRE.31)MOV(1440,Cfg_PollT)MOV(86400000,Wrk_PollT.PRE);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Comment>
+<![CDATA[Cfg_RetryT:  The Retry Time (def = 60 min = 1 hour) is the number of
+minutes between polls of the NTP server for
+reliable time after a FAILURE to get the time.
+
+If the entered time results in a negative timer preset (which would
+fault the controller), set the retry time to its default.]]>
+</Comment>
+<Text>
+<![CDATA[XIC(Wrk_LastSyncFail)MUL(Cfg_RetryT,60000,Wrk_PollT.PRE)XIC(Wrk_PollT.PRE.31)MOV(60,Cfg_RetryT)MOV(3600000,Wrk_PollT.PRE);]]>
+</Text>
+</Rung>
+<Rung Number="3" Type="N">
+<Comment>
+<![CDATA[The EtherNet/IP Module Slot Number is a USINT (valid values = 0 to 255,
+although you'll probably never see one higher than 16.....).
+If the slot number is not valid, make it a valid value.]]>
+</Comment>
+<Text>
+<![CDATA[AND(Cfg_ENSlotNumber,16#00FF,Cfg_ENSlotNumber);]]>
+</Text>
+</Rung>
+<Rung Number="4" Type="N">
+<Comment>
+<![CDATA[============================================================
+HANDLE COMMANDS
+============================================================
+These rungs handle Commands received by this instruction.
+
+If the Operator sends the Enable Command, and Engineering allows it,
+enable the periodic sync function.]]>
+</Comment>
+<Text>
+<![CDATA[XIC(MCmd_Enable)OTU(MCmd_Enable)XIC(Cfg_AllowPeriodicSync)OTL(Wrk_Enabled);]]>
+</Text>
+</Rung>
+<Rung Number="5" Type="N">
+<Comment>
+<![CDATA[If the Operator sends the Disable Command, or if Engineering disallows it,
+turn off the periodic sync function.]]>
+</Comment>
+<Text>
+<![CDATA[[XIC(MCmd_Disable) OTU(MCmd_Disable) ,XIO(Cfg_AllowPeriodicSync) ]OTU(Wrk_Enabled);]]>
+</Text>
+</Rung>
+<Rung Number="6" Type="N">
+<Comment>
+<![CDATA[If the instruction is Enabled, show the Enabled status and
+show ready to receive the Disable command.
+
+If the instruction is NOT Enabled, it is ready to receive the Enable command.
+
+If periodic sync is not allowed (Engineering Config), disable buttons.]]>
+</Comment>
+<Text>
+<![CDATA[XIC(Cfg_AllowPeriodicSync)[XIC(Wrk_Enabled) OTE(Sts_Enabled) OTE(Rdy_Disable) ,XIO(Wrk_Enabled) OTE(Rdy_Enable) ];]]>
+</Text>
+</Rung>
+<Rung Number="7" Type="N">
+<Comment>
+<![CDATA[If the Operator sends the Enable Command, and Engineering allows it,
+enable the periodic sync function.]]>
+</Comment>
+<Text>
+<![CDATA[XIC(MCmd_Sync)OTU(MCmd_Sync)XIC(Cfg_AllowMCmdSync)EQU(0,Wrk_State)OTL(Wrk_SyncNow);]]>
+</Text>
+</Rung>
+<Rung Number="8" Type="N">
+<Comment>
+<![CDATA[If Engineering configuration allows operator sync and we're not busy syncing
+right now, enable the HMI "sync now" command button.]]>
+</Comment>
+<Text>
+<![CDATA[XIC(Cfg_AllowMCmdSync)EQU(0,Wrk_State)OTE(Rdy_Sync);]]>
+</Text>
+</Rung>
+<Rung Number="9" Type="N">
+<Comment>
+<![CDATA[============================================================
+SYNC SEQUENCE STATE MACHINE
+============================================================
+STATE 0: Wait for sync command or interval between Periodic updates.
+
+Execute timer and populate the minutes:seconds countdown display.
+If not leaving this state (timer not done), TND returns out of the AOI. this saves on scan time.
+
+Go to State 1 when timer goes done or a valid sync command is received.]]>
+</Comment>
+<Text>
+<![CDATA[EQU(0,Wrk_State)[TON(Wrk_PollT,?,?) ,CPT(Val_NextSyncSec,((Wrk_PollT.PRE-Wrk_PollT.ACC)/1000) MOD 60) ,CPT(Val_NextSyncMin,(Wrk_PollT.PRE-Wrk_PollT.ACC)/60000) ];]]>
+</Text>
+</Rung>
+<Rung Number="10" Type="N">
+<Text>
+<![CDATA[XIO(Wrk_Enabled)CLR(Val_NextSyncSec)CLR(Val_NextSyncMin);]]>
+</Text>
+</Rung>
+<Rung Number="11" Type="N">
+<Text>
+<![CDATA[EQU(Wrk_State,0)[XIC(Wrk_Enabled) XIC(Wrk_PollT.DN) ,XIC(Wrk_SyncNow) OTU(Wrk_SyncNow) ,XIC(S:FS) XIC(Cfg_SyncOnPwrup) ]MOV(1,Wrk_State);]]>
+</Text>
+</Rung>
+<Rung Number="12" Type="N">
+<Text>
+<![CDATA[EQU(Wrk_State,0)JMP(End);]]>
+</Text>
+</Rung>
+<Rung Number="13" Type="N">
+<Comment>
+<![CDATA[STATE 1: INITIALIZE MSGS, CREATE SOCKET
+
+Populate the path data in the MSG path strings.
+Initialize the destination IP for the message write instruction.
+Initialize the message read and write timeout parameters.
+Clear all instruction status bits.
+
+Execute message to create socket object.
+Socket is created when message goes done.
+Move the instance (handle) number of the socket
+into the open, write, read and delete messages
+so they know which socket to reference. Go to State 2.
+
+If message errors, socket was not created; go to state 0
+to wait one inteval before trying again..
+]]>
+</Comment>
+<Text>
+<![CDATA[EQU(1,Wrk_State)[MOV(2,Ref_SockCreateMSG.Path.LEN) MOV(1,Ref_SockCreateMSG.Path.DATA[0]) MOV(Cfg_ENSlotNumber,Ref_SockCreateMSG.Path.DATA[1]) ,COP(Ref_SockCreateMSG.Path,Ref_SockOpenMSG.Path,1) COP(Ref_SockCreateMSG.Path,Ref_SockReadMSG.Path,1) ,COP(Ref_SockCreateMSG.Path,Ref_SockWriteMSG.Path,1) COP(Ref_SockCreateMSG.Path,Ref_SockDeleteMSG.Path,1) ,CLR(Ref_SockData.Write_Source.ToAddr.IP_1st_Octect) CLR(Ref_SockData.Write_Source.ToAddr.IP_2nd_Octect) ,CLR(Ref_SockData.Write_Source.ToAddr.IP_3rd_Octect) CLR(Ref_SockData.Write_Source.ToAddr.IP_4th_Octect) ,MOV(1000,Ref_SockData.Write_Source.Timeout) MOV(5000,Ref_SockData.Read_Source.Timeout) ,OTU(Sts_NoSock) OTU(Sts_HostInv) OTU(Sts_ReqFail) OTU(Sts_NoReply) OTU(Sts_BadReply) OTU(Sts_Done) OTU(Sts_MsgErr) ];]]>
+</Text>
+</Rung>
+<Rung Number="14" Type="N">
+<Comment>
+<![CDATA[STATE 1 (continued):  CREATE SOCKET
+
+Execute message to create socket object.
+Socket is created when message goes done.
+Move the instance (handle) number of the socket into the read, write,
+and delete messages so they know what to reference. Go to State 3.
+
+If message errors, socket was not created; go to state 0
+to wait one inteval before trying again..
+]]>
+</Comment>
+<Text>
+<![CDATA[EQU(1,Wrk_State)[XIO(Ref_SockCreateMSG.EN) MSG(Ref_SockCreateMSG) ,XIC(Ref_SockCreateMSG.ER) OTL(Sts_MsgErr) OTL(Sts_NoSock) OTL(Wrk_LastSyncFail) MOV(0,Wrk_State) ,XIC(Ref_SockCreateMSG.DN) [MOV(Ref_SockData.Instance,Ref_SockOpenMSG.Instance) MOV(Ref_SockData.Instance,Ref_SockWriteMSG.Instance) ,MOV(Ref_SockData.Instance,Ref_SockReadMSG.Instance) MOV(Ref_SockData.Instance,Ref_SockDeleteMSG.Instance) MOV(2,Wrk_State) ] ];]]>
+</Text>
+</Rung>
+<Rung Number="15" Type="N">
+<Comment>
+<![CDATA[STATE 2:   OPEN SOCKET
+
+Execute message to open the socket with the configured hostname.
+Need to take hostname and append "?port=123", then add 8 more
+bytes (for timeout and string length) to request size for MSG.
+
+When the message goes done, the IP address of the given host has
+been determined and the link is open. Go to State 3 when done,
+or State 7 (to delete socket created above) on error.]]>
+</Comment>
+<Text>
+<![CDATA[EQU(2,Wrk_State)[XIO(Ref_SockOpenMSG.EN) CONCAT(Cfg_Host,Cfg_Port,Ref_SockData.Open_Source.Dest_Addr) ADD(Ref_SockData.Open_Source.Dest_Addr.LEN,8,Ref_SockOpenMSG.REQ_LEN) MSG(Ref_SockOpenMSG) ,XIC(Ref_SockOpenMSG.ER) OTL(Sts_MsgErr) OTL(Sts_HostInv) OTL(Wrk_LastSyncFail) MOV(7,Wrk_State) ,XIC(Ref_SockOpenMSG.DN) MOV(3,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="16" Type="N">
+<Comment>
+<![CDATA[STATE 3.  WRITE NTP REQUEST DATA
+
+The write message length must be set to 16 larger then the string size.
+Go to State 4 when done, or State 7 (to delete socket created above) on error.]]>
+</Comment>
+<Text>
+<![CDATA[EQU(3,Wrk_State)[XIO(Ref_SockWriteMSG.EN) ADD(Ref_SockData.Write_Source.Buffer.LEN,16,Ref_SockWriteMSG.REQ_LEN) MSG(Ref_SockWriteMSG) ,XIC(Ref_SockWriteMSG.ER) OTL(Sts_MsgErr) OTL(Sts_ReqFail) OTL(Wrk_LastSyncFail) MOV(7,Wrk_State) ,XIC(Ref_SockWriteMSG.DN) MOV(4,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="17" Type="N">
+<Comment>
+<![CDATA[STATE 4: WAIT FOR AND READ RECEIVED RESPOINSE
+
+Go to State 5 when done, or State 7 (to delete socket created above) on error.]]>
+</Comment>
+<Text>
+<![CDATA[EQU(4,Wrk_State)[XIO(Ref_SockReadMSG.EN) MSG(Ref_SockReadMSG) ,XIC(Ref_SockReadMSG.ER) OTL(Sts_MsgErr) OTL(Sts_NoReply) OTL(Wrk_LastSyncFail) MOV(7,Wrk_State) ,XIC(Ref_SockReadMSG.DN) MOV(5,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="18" Type="N">
+<Comment>
+<![CDATA[STATE 5: CHECK RECEIVED DATA SIZE
+
+If data is not 48 bytes in length, then there is a data error; go to State 7
+to delete the socket we created above.
+Otherwise, data should be ok, and go to State 6 to process it.]]>
+</Comment>
+<Text>
+<![CDATA[EQU(5,Wrk_State)[NEQ(Ref_SockData.Read_Response.Data_Length,48) OTL(Sts_MsgErr) OTL(Sts_BadReply) OTL(Wrk_LastSyncFail) MOV(7,Wrk_State) ,EQU(Ref_SockData.Read_Response.Data_Length,48) GSV(WallClockTime,,DateTime,Wrk_CtrlrTime.Year) MOV(6,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="19" Type="N">
+<Comment>
+<![CDATA[STATE 6: INTERPRET TIME, SET CONTROLLER CLOCK
+
+Byte swap data to match controller format. Convert NTP time to real date.
+Read the TASK rate, and if it is more than 50 ms, add the part OVER 50 ms to
+the time (fractional seconds) to account for scan delay after receiving the server's
+reply.  The Date is then written to the controllers clock if "Cfg_AllowSync" is set.
+The time difference between the controller clock and the NTP time is also calculated for use
+in ramping the clock toward the reference.
+
+Go to State 7 to clean up (delete socket created above).]]>
+</Comment>
+<Text>
+<![CDATA[EQU(6,Wrk_State)[SWPB(Ref_SockData.Read_Response.NTP_Data.Transmitted_Time_Whole_Seconds,REVERSE,Wrk_NTPSec.Seconds) SWPB(Ref_SockData.Read_Response.NTP_Data.Transmitted_Time_Fractional_Seconds,REVERSE,Wrk_NTPFracSec) ,BTD(Wrk_NTPFracSec,4,Wrk_NTPSec.MicroSeconds,0,28) AND(Wrk_NTPSec.MicroSeconds,16#0fff_ffff,Wrk_NTPSec.MicroSeconds) MUL(Wrk_NTPSec.MicroSeconds,3.725290298E-3,Wrk_NTPSec.MicroSeconds) GSV(Task,This,Rate,Wrk_TaskPer) ,GEQ(Wrk_TaskPer,50000) CPT(Wrk_NTPSec.MicroSeconds,Wrk_NTPSec.MicroSeconds+Wrk_TaskPer-50000) ,T_ADD(Wrk_TAdd,Wrk_NTPRollover,Wrk_NTPSec,Wrk_NTPTime) ,XIC(Cfg_AllowClockUpdate) SSV(WallClockTime,,DateTime,Wrk_NTPTime.Year) ,MOV(Wrk_NTPTime.Year,Val_RcvdYr) MOV(Wrk_NTPTime.Month,Val_RcvdMo) MOV(Wrk_NTPTime.Day,Val_RcvdDa) MOV(Wrk_NTPTime.Hours,Val_RcvdHr) ,MOV(Wrk_NTPTime.Minutes,Val_RcvdMin) MOV(Wrk_NTPTime.Seconds,Val_RcvdSec) MOV(Wrk_NTPTime.MicroSeconds,Val_RcvdUSec) ,T_DIFF(Wrk_TDiff,Wrk_CtrlrTime,Wrk_NTPTime,Wrk_CtrlrClockDrift) MOV(Wrk_CtrlrClockDrift.Day,Val_DriftDa) MOV(Wrk_CtrlrClockDrift.Hours,Val_DriftHr) ,MOV(Wrk_CtrlrClockDrift.Minutes,Val_DriftMin) MOV(Wrk_CtrlrClockDrift.Seconds,Val_DriftSec) MOV(Wrk_CtrlrClockDrift.MicroSeconds,Val_DriftUSec) ,OTL(Sts_Done) OTU(Wrk_LastSyncFail) MOV(7,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="20" Type="N">
+<Comment>
+<![CDATA[STATE 7:  DELETE SOCKET
+
+Go to State 0 after completion (ER or DN).]]>
+</Comment>
+<Text>
+<![CDATA[EQU(7,Wrk_State)[MSG(Ref_SockDeleteMSG) ,[XIC(Ref_SockDeleteMSG.ER) ,XIC(Ref_SockDeleteMSG.DN) ] MOV(0,Wrk_State) ];]]>
+</Text>
+</Rung>
+<Rung Number="21" Type="N">
+<Comment>
+<![CDATA[============================================================
+STATUS AND READIES
+============================================================
+If the instruction is Enabled:
+
+* Show the Enabled status.
+* If it is in the midst of polling the CPU data, show the Busy status.
+*  If the Update timer is timing but the poll is NOT busy, show the Timing status.
+(Sts_MsgErr and Sts_Done are handled above.)
+*  Show Ready to receive the Disable command.]]>
+</Comment>
+<Text>
+<![CDATA[LBL(End)XIC(Wrk_Enabled)XIC(Wrk_PollT.TT)EQU(Wrk_State,0)OTE(Sts_Timing);]]>
+</Text>
+</Rung>
+<Rung Number="22" Type="N">
+<Text>
+<![CDATA[NEQ(Wrk_State,0)OTE(Sts_Busy);]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+<Routine Name="Prescan" Type="RLL">
+<Description>
+<![CDATA[Establish constants, clear "lurking" commands, set up for RUN mode]]>
+</Description>
+<RLLContent>
+<Rung Number="0" Type="N">
+<Comment>
+<![CDATA[============================================================
+PRESCAN :  Initialize
+============================================================
+Sets the NTP IP Port Number (123) and the
+NTP Rollover date (DT#2036-02-07_06:28:16.000000).]]>
+</Comment>
+<Text>
+<![CDATA[[MOV(123,Ref_SockData.Write_Source.ToAddr.Port) MOV(2036,Wrk_NTPRollover.Year) MOV(2,Wrk_NTPRollover.Month) MOV(7,Wrk_NTPRollover.Day) ,MOV(6,Wrk_NTPRollover.Hours) MOV(28,Wrk_NTPRollover.Minutes) MOV(16,Wrk_NTPRollover.Seconds) CLR(Wrk_NTPRollover.MicroSeconds) ];]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Comment>
+<![CDATA[Clear any "lurking" command bits that were set while the controller was in PROG mode.]]>
+</Comment>
+<Text>
+<![CDATA[OTU(MCmd_Sync)OTU(MCmd_Enable)OTU(MCmd_Disable);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Comment>
+<![CDATA[Reset all Status bits and synchronization sequence state.]]>
+</Comment>
+<Text>
+<![CDATA[[OTU(Sts_Timing) OTU(Sts_Busy) OTU(Sts_Done) OTU(Sts_MsgErr) OTU(Sts_HostInv) ,OTU(Sts_NoSock) OTU(Sts_ReqFail) OTU(Sts_NoReply) OTU(Sts_BadReply) CLR(Wrk_State) ];]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+<Dependencies>
+<Dependency Type="DataType" Name="T_Sync_Data"/>
+<Dependency Type="DataType" Name="DateTime"/>
+<Dependency Type="AddOnInstructionDefinition" Name="T_ADD"/>
+<Dependency Type="AddOnInstructionDefinition" Name="T_DIFF"/>
+</Dependencies>
+</AddOnInstructionDefinition>
+</AddOnInstructionDefinitions>
+<Tags Use="Context">
+<Tag Name="DATETIME" TagType="Base" DataType="Time" Constant="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Structure of Current Datetime]]>
+</Description>
+<Data Format="L5K">
+<![CDATA[[2017,11,10,22,9,5,311797]]]>
+</Data>
+<Data Format="Decorated">
+<Structure DataType="Time">
+<DataValueMember Name="Year" DataType="DINT" Radix="Decimal" Value="2017"/>
+<DataValueMember Name="Month" DataType="DINT" Radix="Decimal" Value="11"/>
+<DataValueMember Name="Day" DataType="DINT" Radix="Decimal" Value="10"/>
+<DataValueMember Name="Hour" DataType="DINT" Radix="Decimal" Value="22"/>
+<DataValueMember Name="Minute" DataType="DINT" Radix="Decimal" Value="9"/>
+<DataValueMember Name="Second" DataType="DINT" Radix="Decimal" Value="5"/>
+<DataValueMember Name="Microsecond" DataType="DINT" Radix="Decimal" Value="311797"/>
+</Structure>
+</Data>
+</Tag>
+<Tag Name="T_Sync_Instance" TagType="Base" DataType="T_Sync" Constant="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: AOI instance to get time from NTP server]]>
+</Description>
+<Data Format="L5K">
+<![CDATA[[36181567,1440,60,0,2018,6,29,13,1,41,429758,0,0,0,0,-269590,1294,0,[0,-1,-1,-1,-1,737179,2018,3,3,2018,737179,[0
+					,0,0,0,0,0,-269590]],[0,0,-6432,-154361,-9261687,0,2018,2018,3,6,737179,2035,11,120,[2036,2,7,6,28,16,0]],0,[2018,6,29,13
+					,1,41,429758],[0,0,0,0,0,-555701195,429758],[2036,2,7,6,28,16,0],1845796863,[-1072558867,86400000,8759087],[2018
+					,6,29,13,1,41,160168],[0,0,0,0,0,0,-269590],10000,[11,'192.168.2.1$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00'
+					],[9,'?port=123$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00'
+					]]]]>
+</Data>
+<Data Format="Decorated">
+<Structure DataType="T_Sync">
+<DataValueMember Name="EnableIn" DataType="BOOL" Value="1"/>
+<DataValueMember Name="EnableOut" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Cfg_PollT" DataType="DINT" Radix="Decimal" Value="1440"/>
+<DataValueMember Name="Cfg_RetryT" DataType="DINT" Radix="Decimal" Value="60"/>
+<DataValueMember Name="Cfg_ENSlotNumber" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Cfg_AllowClockUpdate" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Cfg_AllowMCmdSync" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Cfg_AllowPeriodicSync" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Cfg_SyncOnPwrup" DataType="BOOL" Value="1"/>
+<DataValueMember Name="MCmd_Sync" DataType="BOOL" Value="0"/>
+<DataValueMember Name="MCmd_Enable" DataType="BOOL" Value="0"/>
+<DataValueMember Name="MCmd_Disable" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Val_RcvdYr" DataType="DINT" Radix="Decimal" Value="2018"/>
+<DataValueMember Name="Val_RcvdMo" DataType="DINT" Radix="Decimal" Value="6"/>
+<DataValueMember Name="Val_RcvdDa" DataType="DINT" Radix="Decimal" Value="29"/>
+<DataValueMember Name="Val_RcvdHr" DataType="DINT" Radix="Decimal" Value="13"/>
+<DataValueMember Name="Val_RcvdMin" DataType="DINT" Radix="Decimal" Value="1"/>
+<DataValueMember Name="Val_RcvdSec" DataType="DINT" Radix="Decimal" Value="41"/>
+<DataValueMember Name="Val_RcvdUSec" DataType="DINT" Radix="Decimal" Value="429758"/>
+<DataValueMember Name="Val_DriftDa" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Val_DriftHr" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Val_DriftMin" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Val_DriftSec" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Val_DriftUSec" DataType="DINT" Radix="Decimal" Value="-269590"/>
+<DataValueMember Name="Val_NextSyncMin" DataType="DINT" Radix="Decimal" Value="1294"/>
+<DataValueMember Name="Val_NextSyncSec" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Sts_Enabled" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Sts_Timing" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Sts_Busy" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_Done" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Sts_MsgErr" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_NoSock" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_HostInv" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_ReqFail" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_NoReply" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Sts_BadReply" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Rdy_Sync" DataType="BOOL" Value="1"/>
+<DataValueMember Name="Rdy_Enable" DataType="BOOL" Value="0"/>
+<DataValueMember Name="Rdy_Disable" DataType="BOOL" Value="1"/>
+<DataValueMember Name="T_Sync" DataType="BOOL" Value="0"/>
+</Structure>
+</Data>
+</Tag>
+<Tag Name="T_Sync_NTPData" TagType="Base" DataType="T_Sync_Data" Constant="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: Structure for data sent to / received from NTP server]]>
+</Description>
+<Data Format="L5K">
+<![CDATA[[[2,[2,0,0,0,0,0]],19861,[5000,[20,'192.168.2.1?port=12333$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00'
+					]],[5000,52],[[2,123,1,2,-88,-64],48,[-100662260,-1191051264,0,33554438,2058019038,-3170232,0,0,900522206,-7404434
+					,900522206,-6355858,0]],[1000,[2,123,0,0,0,0],[48,'$0B$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00'
+					]],48]]]>
+</Data>
+<Data Format="Decorated">
+<Structure DataType="T_Sync_Data">
+<StructureMember Name="Create_Source" DataType="T_Sync_CreateSrc">
+<DataValueMember Name="Type" DataType="DINT" Radix="Decimal" Value="2"/>
+<StructureMember Name="Addr" DataType="T_Sync_SockAddr">
+<DataValueMember Name="Family" DataType="INT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="Port" DataType="INT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_4th_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_3rd_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_2nd_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_1st_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+</StructureMember>
+</StructureMember>
+<DataValueMember Name="Instance" DataType="DINT" Radix="Decimal" Value="19861"/>
+<StructureMember Name="Open_Source" DataType="T_Sync_OpenSrc">
+<DataValueMember Name="Timeout" DataType="DINT" Radix="Decimal" Value="5000"/>
+<StructureMember Name="Dest_Addr" DataType="STRING">
+<DataValueMember Name="LEN" DataType="DINT" Radix="Decimal" Value="20"/>
+<DataValueMember Name="DATA" DataType="STRING" Radix="ASCII">
+<![CDATA['192.168.2.1?port=123']]>
+</DataValueMember>
+</StructureMember>
+</StructureMember>
+<StructureMember Name="Read_Source" DataType="T_Sync_ReadSrc">
+<DataValueMember Name="Timeout" DataType="DINT" Radix="Decimal" Value="5000"/>
+<DataValueMember Name="BufLen" DataType="DINT" Radix="Decimal" Value="52"/>
+</StructureMember>
+<StructureMember Name="Read_Response" DataType="T_Sync_ReadDest">
+<StructureMember Name="From_Address" DataType="T_Sync_SockAddr">
+<DataValueMember Name="Family" DataType="INT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="Port" DataType="INT" Radix="Decimal" Value="123"/>
+<DataValueMember Name="IP_4th_Octect" DataType="SINT" Radix="Decimal" Value="1"/>
+<DataValueMember Name="IP_3rd_Octect" DataType="SINT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="IP_2nd_Octect" DataType="SINT" Radix="Decimal" Value="-88"/>
+<DataValueMember Name="IP_1st_Octect" DataType="SINT" Radix="Decimal" Value="-64"/>
+</StructureMember>
+<DataValueMember Name="Data_Length" DataType="DINT" Radix="Decimal" Value="48"/>
+<StructureMember Name="NTP_Data" DataType="T_Sync_ReadData">
+<DataValueMember Name="Flags" DataType="DINT" Radix="Decimal" Value="-100662260"/>
+<DataValueMember Name="Delay" DataType="DINT" Radix="Decimal" Value="-1191051264"/>
+<DataValueMember Name="Dispersion" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="ID" DataType="DINT" Radix="Decimal" Value="33554438"/>
+<DataValueMember Name="Reference_SecTime_Whole_Seconds" DataType="DINT" Radix="Decimal" Value="2058019038"/>
+<DataValueMember Name="Reference_Time_Fractional_Seconds" DataType="DINT" Radix="Decimal" Value="-3170232"/>
+<DataValueMember Name="Originator_SecTime_Whole_Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Originator_Time_Fractional_Seconds" DataType="DINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="Recieved_Time_Whole_Seconds" DataType="DINT" Radix="Decimal" Value="900522206"/>
+<DataValueMember Name="Recieved_Time_Fractional_Seconds" DataType="DINT" Radix="Decimal" Value="-7404434"/>
+<DataValueMember Name="Transmitted_Time_Whole_Seconds" DataType="DINT" Radix="Decimal" Value="900522206"/>
+<DataValueMember Name="Transmitted_Time_Fractional_Seconds" DataType="DINT" Radix="Decimal" Value="-6355858"/>
+<DataValueMember Name="pad" DataType="DINT" Radix="Decimal" Value="0"/>
+</StructureMember>
+</StructureMember>
+<StructureMember Name="Write_Source" DataType="T_Sync_WriteSrc">
+<DataValueMember Name="Timeout" DataType="DINT" Radix="Decimal" Value="1000"/>
+<StructureMember Name="ToAddr" DataType="T_Sync_SockAddr">
+<DataValueMember Name="Family" DataType="INT" Radix="Decimal" Value="2"/>
+<DataValueMember Name="Port" DataType="INT" Radix="Decimal" Value="123"/>
+<DataValueMember Name="IP_4th_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_3rd_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_2nd_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+<DataValueMember Name="IP_1st_Octect" DataType="SINT" Radix="Decimal" Value="0"/>
+</StructureMember>
+<StructureMember Name="Buffer" DataType="STRING">
+<DataValueMember Name="LEN" DataType="DINT" Radix="Decimal" Value="48"/>
+<DataValueMember Name="DATA" DataType="STRING" Radix="ASCII">
+<![CDATA['$0B$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00$00']]>
+</DataValueMember>
+</StructureMember>
+</StructureMember>
+<DataValueMember Name="Write_SizeSent" DataType="DINT" Radix="Decimal" Value="48"/>
+</Structure>
+</Data>
+</Tag>
+<Tag Name="T_Sync_SockCreate" TagType="Base" DataType="MESSAGE" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: MSG to create TCP/UDP IP socket for link to NTP server]]>
+</Description>
+<Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="12" ConnectedFlag="2" ConnectionPath="1, 0" CommTypeCode="0" ServiceCode="16#004b" ObjectType="16#0342" TargetObject="0" AttributeNumber="16#0000" LocalIndex="0" LocalElement="T_Sync_NTPData.Create_Source"
+ DestinationTag="T_Sync_NTPData.Instance" LargePacketUsage="false"/>
+</Data>
+</Tag>
+<Tag Name="T_Sync_SockDelete" TagType="Base" DataType="MESSAGE" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: MSG to delete TCP/UDP IP socket for link to NTP server]]>
+</Description>
+<Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="0" ConnectedFlag="2" ConnectionPath="1, 0" CommTypeCode="0" ServiceCode="16#004f" ObjectType="16#0342" TargetObject="19861" AttributeNumber="16#0000" LocalIndex="0" LargePacketUsage="false"
+/>
+</Data>
+</Tag>
+<Tag Name="T_Sync_SockOpen" TagType="Base" DataType="MESSAGE" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: MSG to open socekt path to NTP server (get IP addr. from hostname)]]>
+</Description>
+<Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="28" ConnectedFlag="2" ConnectionPath="1, 0" CommTypeCode="0" ServiceCode="16#004c" ObjectType="16#0342" TargetObject="19861" AttributeNumber="16#0000" LocalIndex="0" LocalElement="T_Sync_NTPData.Open_Source"
+ LargePacketUsage="false"/>
+</Data>
+</Tag>
+<Tag Name="T_Sync_SockRead" TagType="Base" DataType="MESSAGE" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: MSG to send time request packet to NTP server]]>
+</Description>
+<Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="8" ConnectedFlag="2" ConnectionPath="1, 0" CommTypeCode="0" ServiceCode="16#004d" ObjectType="16#0342" TargetObject="19861" AttributeNumber="16#0000" LocalIndex="0" LocalElement="T_Sync_NTPData.Read_Source"
+ DestinationTag="T_Sync_NTPData.Read_Response" LargePacketUsage="false"/>
+</Data>
+</Tag>
+<Tag Name="T_Sync_SockWrite" TagType="Base" DataType="MESSAGE" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Time Sync: MSG to reat time response data from NTP server]]>
+</Description>
+<Data Format="Message">
+<MessageParameters MessageType="CIP Generic" RequestedLength="64" ConnectedFlag="2" ConnectionPath="1, 0" CommTypeCode="0" ServiceCode="16#004e" ObjectType="16#0342" TargetObject="19861" AttributeNumber="16#0000" LocalIndex="0" LocalElement="T_Sync_NTPData.Write_Source"
+ DestinationTag="T_Sync_NTPData.Write_SizeSent" LargePacketUsage="false"/>
+</Data>
+</Tag>
+</Tags>
+<Programs Use="Context">
+<Program Use="Context" Name="Supervisor">
+<Routines Use="Context">
+<Routine Use="Target" Name="NTP" Type="RLL">
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[NOP();]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Comment>
+<![CDATA[============================================================
+T_Sync:  TIME -- CONTROLLER CLOCK SYNC
+============================================================
+Version 1.0-04 Release:  2014-06-06
+V1.0-00  2013-03-05:  First release for use with PlantPAx Library 2.0-09.
+V1.0-01  2013-06-30: Changed self-named parameter to Read/Write external
+access (for future PlantPAx Process Library 3.0 ME Faceplate use)
+V1.0-02  2014-02-28:  Modified to use Cfg_Host (local string) for host
+name or IP address, e.g., "timeserver.domain.com".
+Default value is "time.nist.gov", a redirect to a large
+network of shared time servers. Uses updated T_ADD V1.0-01.
+V1.0-03  2014-05-28:  Corrected configured Source Element for Open
+Socket MSG to point to T_Sync_NTPData.Open_Source.
+V1.0-04 2014-06-06: Added rung (in AOI Logic routine) for Local Strings
+to aid in setting timeserver hostname and IP port.
+============================================================
+This object synchronizes the controller real-time clock with a
+"reliable" NTP Time Server (computer responsible for
+network time, or a standard time server, like time.windows.com, etc.)
+It supports the following featues:
+* Ability to sync controller clock to server on operator command
+* Ability to sync on a periodic (default = daily) basis
+* Ability to retry on a periodic (default = hourly) basis
+on a failure to retrieve date/time from server
+* Ability to sync on controller powerup or PROG to RUN transition.
+* Ability via configuration to allow or disallow each of the above methods
+* Reads time from NTP server and displays time received as Values.
+* Updates the controller clock to time received (if allowed by config)
+* Calculates clock drift (difference between previous and new
+controller time) and displays as Values.
+============================================================
+SETUP
+============================================================
+Cfg_Host is the host name or IP address of the NTP server.  If you have
+a domain controller, you should use that as your time server.
+The default is "time.nist.gov" which is a redirect to a number
+of NIST servers around the U.S.  This string may
+contain a host name (e.g., 'timeserver.domain.com') or
+an IP address (e.g., '192.168.1.1')
+
+Cfg_Port is a text string giving the IP port to use for the time service.
+The format is '?Port=nnn' and the default is '?Port=123'.
+
+Cfg_PollT: is the number of minutes between polls of the NTP server. (Def = once a day)
+
+Cfg_RetryT is a shorter poll interval used to retry after a failed poll. (Def = once an hour)
+SET THE ABOVE TWO VALUES ACCORDING TO THE GUIDELINES AT NTP.ORG!
+
+Cfg_ENSlotNumber MUST be set to the slot number (in the controller chassis)
+of the EtherNet/IP bridge module (e.g., 1756-EN2T) with access to the
+time server.  This module must support "socket services".
+See Rockwell Automation Publication ENET-AT002_-EN-P for details.
+
+See Instruction Help for more information on setup.]]>
+</Comment>
+<Text>
+<![CDATA[[T_Sync(T_Sync_Instance,T_Sync_NTPData,T_Sync_SockCreate,T_Sync_SockOpen,T_Sync_SockWrite,T_Sync_SockRead,T_Sync_SockDelete) ,EQU(DATETIME.Hour,2) OTE(T_Sync_Instance.MCmd_Sync) ];]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+</Controller>
+</RSLogix5000Content>
