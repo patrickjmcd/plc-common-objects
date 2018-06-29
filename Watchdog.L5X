@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--2-way connection with Meshify M1-->
+<RSLogix5000Content SchemaRevision="1.0" SoftwareRevision="31.00" TargetName="Watchdog" TargetType="Routine" TargetSubType="RLL" ContainsContext="true" Owner="Patrick McDonagh" ExportDate="Fri Jun 29 10:50:15 2018" ExportOptions="References NoRawData L5KData DecoratedData Context Dependencies ForceProtectedEncoding AllProjDocTrans">
+<Controller Use="Context" Name="Transfer_Station_Lite">
+<DataTypes Use="Context">
+</DataTypes>
+<Tags Use="Context">
+<Tag Name="watchdog_INT" TagType="Base" DataType="DINT" Radix="Decimal" Constant="false" ExternalAccess="Read/Write">
+<Description>
+<![CDATA[Watchdog Integer (Set by cellular modem)]]>
+</Description>
+<Data Format="L5K">
+<![CDATA[9654]]>
+</Data>
+<Data Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="9654"/>
+</Data>
+</Tag>
+<Tag Name="watchdogTimeout" TagType="Base" DataType="BOOL" Radix="Decimal" Constant="false" ExternalAccess="Read/Write">
+<Data Format="L5K">
+<![CDATA[1]]>
+</Data>
+<Data Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="1"/>
+</Data>
+</Tag>
+</Tags>
+<Programs Use="Context">
+<Program Use="Context" Name="Supervisor">
+<Tags Use="Context">
+<Tag Name="watchdog_changed" TagType="Base" DataType="BOOL" Radix="Decimal" Constant="false" ExternalAccess="Read/Write">
+<Data Format="L5K">
+<![CDATA[0]]>
+</Data>
+<Data Format="Decorated">
+<DataValue DataType="BOOL" Radix="Decimal" Value="0"/>
+</Data>
+</Tag>
+<Tag Name="watchdog_INT_last" TagType="Base" DataType="DINT" Radix="Decimal" Constant="false" ExternalAccess="Read/Write">
+<Data Format="L5K">
+<![CDATA[9655]]>
+</Data>
+<Data Format="Decorated">
+<DataValue DataType="DINT" Radix="Decimal" Value="9655"/>
+</Data>
+</Tag>
+<Tag Name="Watchdog_Timer" TagType="Base" DataType="TIMER" Constant="false" ExternalAccess="Read/Write">
+<Data Format="L5K">
+<![CDATA[[-1609417553,180000,180002]]]>
+</Data>
+<Data Format="Decorated">
+<Structure DataType="TIMER">
+<DataValueMember Name="PRE" DataType="DINT" Radix="Decimal" Value="180000"/>
+<DataValueMember Name="ACC" DataType="DINT" Radix="Decimal" Value="180002"/>
+<DataValueMember Name="EN" DataType="BOOL" Value="1"/>
+<DataValueMember Name="TT" DataType="BOOL" Value="0"/>
+<DataValueMember Name="DN" DataType="BOOL" Value="1"/>
+</Structure>
+</Data>
+</Tag>
+</Tags>
+<Routines Use="Context">
+<Routine Use="Target" Name="Watchdog" Type="RLL">
+<Description>
+<![CDATA[2-way connection with Meshify M1]]>
+</Description>
+<RLLContent>
+<Rung Number="0" Type="N">
+<Text>
+<![CDATA[NOP();]]>
+</Text>
+</Rung>
+<Rung Number="1" Type="N">
+<Text>
+<![CDATA[CMP(watchdog_INT <> (watchdog_INT_last - 1))OTE(watchdog_changed)MOV(watchdog_INT,watchdog_INT_last)SUB(watchdog_INT,1,watchdog_INT);]]>
+</Text>
+</Rung>
+<Rung Number="2" Type="N">
+<Text>
+<![CDATA[[TON(Watchdog_Timer,?,?) ,XIC(watchdog_changed) RES(Watchdog_Timer) ,XIC(Watchdog_Timer.DN) OTE(watchdogTimeout) ];]]>
+</Text>
+</Rung>
+</RLLContent>
+</Routine>
+</Routines>
+</Program>
+</Programs>
+</Controller>
+</RSLogix5000Content>
