@@ -13,3 +13,9 @@ This routine expects that the external device sets the tag `watchdog_INT` to a r
 *Fetches the current time from an NTP server and sets the PLC time accordingly.*
 
 Based on code provided by Rockwell Automation.
+
+## ms_to_hrsminsec
+
+*Converts a DINT of milliseconds (presumably from a timer object) to hours, minutes, and seconds.*
+
+Very simple, but useful logic to calculate hours, minutes, and seconds from an integer of milliseconds.
